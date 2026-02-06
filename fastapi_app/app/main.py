@@ -7,6 +7,7 @@ from .database import SessionLocal
 from sqlalchemy.orm import Session
 from .database import engine
 from . import models_orm
+from fastapi import HTTPException
 
 models_orm.Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -39,7 +40,7 @@ def create_task(task: TaskCreate, service: TaskService = Depends(get_task_servic
 
 @app.put("/tasks/{task_id}/complete", response_model=Task)
 def complete_task(task_id: int, task_in: TaskCreate, service: TaskService = Depends(get_task_service)):
-    return service.update_task_complete(task_id, task_in)
-
-    repo = SqlTaskRepository(db)
-    return TaskService(repo)
+    updated_task = service.update_task_complete(task_id, task_in)
+    if updated_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return updated_task

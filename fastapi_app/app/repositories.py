@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 from .models import Task, TaskCreate
 
+
 class ITaskRepository(ABC):
     @abstractmethod
     def get_all(self) -> List[Task]:
@@ -13,6 +14,10 @@ class ITaskRepository(ABC):
 
     @abstractmethod
     def get_by_id(self, task_id: int) -> Optional[Task]:
+        pass
+
+    @abstractmethod
+    def get_by_title(self, title: str) -> Optional[Task]:
         pass
 
     @abstractmethod
@@ -40,6 +45,12 @@ class InMemoryTaskRepository(ITaskRepository):
                 return task
         return None
 
+    def get_by_title(self, title: str) -> Optional[Task]:
+        for task in self.tasks:
+            if task.title == title:
+                return task
+        return None
+
     def update_task_complete(self, task_id: int, task_in: TaskCreate) -> Optional[Task]:
         task = self.get_by_id(task_id)
         if task:
@@ -50,6 +61,7 @@ class InMemoryTaskRepository(ITaskRepository):
 
 from sqlalchemy.orm import Session
 from . import models_orm
+
 
 class SqlTaskRepository(ITaskRepository):
     def __init__(self, db: Session):
@@ -68,10 +80,12 @@ class SqlTaskRepository(ITaskRepository):
     def get_by_id(self, task_id: int):
         return self.db.query(models_orm.TaskORM).filter(models_orm.TaskORM.id == task_id).first()
 
-    def update_task_complete(self, task_id: int, task_in: TaskCreate) -> Optional[Task]:
-        db_task = self.get_by_id(task_id)
-        if db_task:
-            db_task.completed = task_in.completed
-            self.db.commit()
-            self.db.refresh(db_task)
-        return db_task
+    def get_by_title(self, title: str):
+        return self.db.query(models_orm.TaskORM).filter(models_orm.TaskORM.title == title).first()
+
+def update_task_complete(self, task_id: int, task_in: TaskCreate) -> Optional[Task]:
+    task = self.get_by_id(task_id)
+    if task:
+        task.completed = task_in.completed
+        return task  # คืนค่า Task ที่อัปเดตแล้ว
+    return None  # คืน None หากไม่พบ task_id
