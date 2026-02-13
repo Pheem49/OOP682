@@ -6,6 +6,7 @@ requires-python = ">=3.13"
 members = [
     "fastapi-app",
     "wk09",
+    "wk10",
 ]
 
 [[package]]
@@ -226,3 +227,8 @@ wheels = [
 name = "wk09"
 version = "0.1.0"
 source = { virtual = "." }
+
+[[package]]
+name = "wk10"
+version = "0.1.0"
+source = { virtual = "wk10" }
